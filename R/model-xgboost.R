@@ -93,32 +93,37 @@ parse_model.xgb.Booster <- function(model) {
 
 # Fit model -----------------------------------------------
 
-get_xgb_case <- function(path, prediction) {
-  cl <- map(
+get_xgb_case <- function(path, prediction, digits = NA) {
+  cl <- purrr::map(
     path,
     ~ {
-      if (.x$op == "less" & .x$missing) i <- expr((!!sym(.x$col) >= !!as.numeric(.x$val) | is.na(!!sym(.x$col))))
-      if (.x$op == "more-equal" & .x$missing) i <- expr((!!sym(.x$col) < !!as.numeric(.x$val) | is.na(!!sym(.x$col))))
-      if (.x$op == "less" & !.x$missing) i <- expr(!!sym(.x$col) >= !!as.numeric(.x$val))
-      if (.x$op == "more-equal" & !.x$missing) i <- expr(!!sym(.x$col) < !!as.numeric(.x$val))
+      if(!is.na(digits)) {
+        val <- round(as.numeric(.x$val), digits)
+      } else {
+        val <- as.numeric(.x$val)
+      }
+      if (.x$op == "less" & .x$missing) i <- expr((!!sym(.x$col) >= !!val | is.na(!!sym(.x$col))))
+      if (.x$op == "more-equal" & .x$missing) i <- expr((!!sym(.x$col) < !!val | is.na(!!sym(.x$col))))
+      if (.x$op == "less" & !.x$missing) i <- expr(!!sym(.x$col) >= !!val)
+      if (.x$op == "more-equal" & !.x$missing) i <- expr(!!sym(.x$col) < !!val)
       i
     }
   )
-  cl <- if (length(cl) > 0) reduce(cl, function(x, y) expr(!!x & !!y)) else TRUE
+  cl <- if (length(cl) > 0) purrr::reduce(cl, function(x, y) expr(!!x & !!y)) else TRUE
   expr(!!cl ~ !!prediction)
 }
 
-get_xgb_case_tree <- function(tree_no, parsedmodel) {
-  map(
+get_xgb_case_tree <- function(tree_no, parsedmodel, digits = NA) {
+  purrr::map(
     parsedmodel$trees[[tree_no]],
-    ~ get_xgb_case(.x$path, .x$prediction)
+    ~ get_xgb_case(.x$path, .x$prediction, digits)
   )
 }
 
 build_fit_formula_xgb <- function(parsedmodel) {
-  f <- map(
+  f <- purrr::map(
     seq_len(length(parsedmodel$trees)),
-    ~ expr(case_when(!!!get_xgb_case_tree(.x, parsedmodel)))
+    ~ expr(case_when(!!!get_xgb_case_tree(.x, parsedmodel, 2)))
   )
 
   # additive model
@@ -127,7 +132,7 @@ build_fit_formula_xgb <- function(parsedmodel) {
   base_score <- parsedmodel$general$params$base_score
   if (is.null(base_score)) base_score <- 0.5
 
-  objective <- parsedmodel$general$params$objective
+  objective <- parsedmodel$general$params$parameters$objective
   assigned <- 0
   if (is.null(objective)) {
     assigned <- 1
