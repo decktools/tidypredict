@@ -132,7 +132,7 @@ build_fit_formula_xgb <- function(parsedmodel) {
   base_score <- parsedmodel$general$params$base_score
   if (is.null(base_score)) base_score <- 0.5
 
-  objective <- parsedmodel$general$params$parameters$objective
+  objective <- parsedmodel$general$params$objective
   assigned <- 0
   if (is.null(objective)) {
     assigned <- 1
