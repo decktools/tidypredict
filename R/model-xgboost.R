@@ -116,7 +116,7 @@ get_xgb_case <- function(path, prediction, digits = NA) {
 get_xgb_case_tree <- function(tree_no, parsedmodel, digits = NA) {
   purrr::map(
     parsedmodel$trees[[tree_no]],
-    ~ get_xgb_case(.x$path, .x$prediction, digits)
+    ~ get_xgb_case(.x$path, round(.x$prediction, 3), digits)
   )
 }
 
