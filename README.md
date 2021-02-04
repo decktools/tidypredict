@@ -1,11 +1,20 @@
-
 # tidypredict <img src="man/figures/logo.png" align="right" width = "120px"/>
+
+## the Deck fork
+
+This is our fork of CRAN's `tidypredict` version 0.4.8. Our fork has 2 differences:
+- fixes a bug in SQL query generation for xgboost logistic regression models. This bugfix has been [merged](https://github.com/tidymodels/tidypredict/pull/92) into the development version of tidypredict on github, but is not on CRAN as of 2021-02-04.
+- we still use our own fork because of a second difference, which is that our fork rounds the feature values in the SQL query for an xgboost model to 2 decimal places and the predictions to 4 decimal places. This is because BigQuery has a character limit on the queries it can execute, and we don't have time to waste characters on extraneous significant figures :wink:
+
+## Checks for the original development version
 
 [![R-CMD-check](https://github.com/tidymodels/tidypredict/workflows/R-CMD-check/badge.svg)](https://github.com/tidymodels/tidypredict/actions)
 [![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/tidypredict)](https://CRAN.r-project.org/package=tidypredict)
 [![Codecov test
 coverage](https://codecov.io/gh/tidymodels/tidypredict/branch/master/graph/badge.svg)](https://codecov.io/gh/tidymodels/tidypredict?branch=master)
 [![Downloads](http://cranlogs.r-pkg.org/badges/tidypredict)](https://CRAN.R-project.org/package=tidypredict)
+
+## Goals
 
 The main goal of `tidypredict` is to enable running predictions inside
 databases. It reads the model, extracts the components needed to
